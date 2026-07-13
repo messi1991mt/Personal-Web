@@ -1,103 +1,597 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Meseret Melkamu</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: Arial; margin: 40px; background:#0f172a; color:white; }
-    h1 { color:#38bdf8; }
-    .card { background:#1e293b; padding:20px; margin-bottom:20px; border-radius:10px; }
-  </style>
+<meta charset="UTF-8">
+<title>Meseret Melkamu Tinssae — Backend & Integration Engineer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e1a;
+    --bg-alt:#0d1322;
+    --surface:#121a2b;
+    --surface-2:#161f34;
+    --border:#233052;
+    --text:#e7ecf5;
+    --muted:#8b97b3;
+    --gold:#fdb913;
+    --gold-dim:#a97e2c;
+    --teal:#2dd4bf;
+    --brown:#8a4d1f;
+    --radius:14px;
+    --serif-disp:'Space Grotesk', sans-serif;
+    --body:'Inter', sans-serif;
+    --mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(253,185,19,0.07), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(45,212,191,0.06), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+
+  /* ---------- background circuit grid ---------- */
+  .grid-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size:42px 42px;
+    mask-image:radial-gradient(ellipse 1200px 800px at 50% 0%, black, transparent 75%);
+  }
+
+  .wrap{position:relative; z-index:1; max-width:920px; margin:0 auto; padding:0 28px 100px;}
+
+  /* ---------- nav progress dots ---------- */
+  .side-nav{
+    position:fixed; right:22px; top:50%; transform:translateY(-50%);
+    display:flex; flex-direction:column; gap:14px; z-index:50;
+  }
+  .side-nav button{
+    width:9px; height:9px; border-radius:50%; border:1px solid var(--border);
+    background:transparent; cursor:pointer; padding:0; transition:all .35s ease;
+  }
+  .side-nav button.active{ background:var(--gold); border-color:var(--gold); box-shadow:0 0 10px rgba(253,185,19,.6); transform:scale(1.3); }
+  @media (max-width: 780px){ .side-nav{display:none;} }
+
+  /* ================= HERO ================= */
+  .hero{
+    min-height:92vh; display:flex; align-items:center;
+    padding-top:60px;
+  }
+  .hero-inner{
+    display:grid; grid-template-columns:1.1fr 0.9fr; gap:50px; align-items:center; width:100%;
+  }
+  @media (max-width:860px){ .hero-inner{grid-template-columns:1fr;} .hero{min-height:auto; padding:70px 0 30px;} }
+
+  .eyebrow{
+    font-family:var(--mono); font-size:12.5px; color:var(--teal); letter-spacing:.12em;
+    display:flex; align-items:center; gap:10px; margin-bottom:18px; opacity:0; animation:fadeUp .7s ease forwards;
+  }
+  .eyebrow::before{content:''; width:26px; height:1px; background:var(--teal);}
+  .status-dot{width:7px; height:7px; border-radius:50%; background:var(--gold); box-shadow:0 0 0 0 rgba(253,185,19,.7); animation:pulseDot 2s infinite;}
+
+  h1.name{
+    font-family:var(--serif-disp); font-weight:700; font-size:clamp(2.2rem, 5vw, 3.4rem);
+    margin:0 0 8px; line-height:1.05; letter-spacing:-0.01em;
+    opacity:0; animation:fadeUp .8s ease .1s forwards;
+  }
+  .name .accent{ color:var(--gold); }
+
+  .role-line{
+    font-family:var(--mono); font-size:clamp(0.98rem, 2vw, 1.15rem); color:var(--muted);
+    height:1.6em; margin-bottom:22px;
+    opacity:0; animation:fadeUp .8s ease .2s forwards;
+  }
+  .role-line .typed{ color:var(--teal); }
+  .cursor{ display:inline-block; width:2px; background:var(--teal); margin-left:2px; animation:blink 1s step-end infinite; }
+
+  .hero-desc{
+    color:var(--muted); font-size:15.5px; max-width:52ch; margin-bottom:28px;
+    opacity:0; animation:fadeUp .8s ease .3s forwards;
+  }
+
+  .hero-ctas{ display:flex; gap:12px; flex-wrap:wrap; opacity:0; animation:fadeUp .8s ease .4s forwards; }
+  .btn{
+    font-family:var(--mono); font-size:13px; padding:11px 20px; border-radius:9px;
+    text-decoration:none; display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+    transition:transform .25s ease, box-shadow .25s ease, background .25s ease;
+    border:1px solid var(--border);
+  }
+  .btn-primary{ background:var(--gold); color:#1a1305; border-color:var(--gold); font-weight:600;}
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 8px 24px rgba(253,185,19,.28);}
+  .btn-ghost{ background:transparent; color:var(--text); }
+  .btn-ghost:hover{ transform:translateY(-2px); border-color:var(--teal); color:var(--teal); }
+
+  /* ---- terminal / integration console (signature element) ---- */
+  .console{
+    background:linear-gradient(180deg, var(--surface), var(--bg-alt));
+    border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.6);
+    overflow:hidden;
+    opacity:0; animation:fadeUp .9s ease .35s forwards;
+  }
+  .console-bar{
+    display:flex; align-items:center; gap:7px; padding:11px 14px;
+    border-bottom:1px solid var(--border); background:rgba(255,255,255,.02);
+  }
+  .console-bar span{ width:9px; height:9px; border-radius:50%; background:#3a4360;}
+  .console-bar .title{ margin-left:8px; font-family:var(--mono); font-size:11px; color:var(--muted);}
+  .console-body{ padding:20px; font-family:var(--mono); font-size:12.5px; }
+
+  .flow{ display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; }
+  .flow-node{ display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; }
+  .flow-node .dot{
+    width:13px; height:13px; border-radius:50%; background:var(--surface-2);
+    border:1.5px solid var(--border); transition:all .4s ease;
+  }
+  .flow-node.lit .dot{ background:var(--teal); border-color:var(--teal); box-shadow:0 0 14px rgba(45,212,191,.7); }
+  .flow-node span.lbl{ font-size:9.5px; color:var(--muted); text-align:center; line-height:1.3; }
+  .flow-line{ flex:1.4; height:1.5px; background:var(--border); position:relative; overflow:hidden; margin:0 2px; margin-bottom:22px; top:-8px;}
+  .flow-line::after{
+    content:''; position:absolute; top:0; left:-40%; width:40%; height:100%;
+    background:linear-gradient(90deg, transparent, var(--teal), transparent);
+    animation:travel 2.8s linear infinite;
+  }
+
+  .code-line{ white-space:pre; color:var(--muted); opacity:0; }
+  .code-line .k{ color:var(--gold); }
+  .code-line .s{ color:var(--teal); }
+  .code-line .ok{ color:#4ade80; }
+
+  /* ================= SECTIONS ================= */
+  section{ padding:70px 0 10px; }
+  .section-head{ display:flex; align-items:baseline; gap:12px; margin-bottom:28px; }
+  .section-num{ font-family:var(--mono); color:var(--gold-dim); font-size:13px; }
+  .section-title{ font-family:var(--serif-disp); font-size:1.6rem; font-weight:600; margin:0; }
+  .section-rule{ flex:1; height:1px; background:linear-gradient(90deg, var(--border), transparent); }
+
+  .reveal{ opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  /* ---- summary stats ---- */
+  .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:10px; }
+  @media (max-width:700px){ .stat-row{grid-template-columns:repeat(2,1fr);} }
+  .stat{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:18px 16px; text-align:center; transition:border-color .3s ease, transform .3s ease;
+  }
+  .stat:hover{ border-color:var(--gold-dim); transform:translateY(-3px); }
+  .stat .num{ font-family:var(--serif-disp); font-size:1.7rem; font-weight:700; color:var(--gold); }
+  .stat .lbl{ font-size:11.5px; color:var(--muted); margin-top:4px; }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:26px 28px; margin-bottom:18px;
+  }
+  .card p{ color:#c3cbdc; margin:0 0 10px; font-size:14.8px; }
+  .card p:last-child{ margin-bottom:0; }
+
+  /* ---- experience timeline ---- */
+  .timeline{ position:relative; padding-left:26px; border-left:1px solid var(--border); }
+  .tl-item{ position:relative; margin-bottom:30px; }
+  .tl-item:last-child{ margin-bottom:0; }
+  .tl-item::before{
+    content:''; position:absolute; left:-31px; top:4px; width:10px; height:10px; border-radius:50%;
+    background:var(--bg); border:2px solid var(--teal);
+  }
+  .tl-role{ font-family:var(--serif-disp); font-weight:600; font-size:1.05rem; }
+  .tl-org{ color:var(--teal); font-family:var(--mono); font-size:12.5px; margin-bottom:12px; }
+  .tl-item ul{ margin:0; padding-left:18px; color:#c3cbdc; font-size:14.5px; }
+  .tl-item li{ margin-bottom:6px; }
+  .tl-item li::marker{ color:var(--gold-dim); }
+
+  /* ---- skills ---- */
+  .skill-group{ margin-bottom:20px; }
+  .skill-comment{ font-family:var(--mono); font-size:12px; color:var(--muted); margin-bottom:10px; }
+  .skill-comment::before{ content:'// '; color:var(--gold-dim); }
+  .tag-row{ display:flex; flex-wrap:wrap; gap:9px; }
+  .tag{
+    font-family:var(--mono); font-size:12.5px; padding:7px 13px; border-radius:7px;
+    background:var(--surface-2); border:1px solid var(--border); color:#d7deec;
+    transition:all .25s ease; cursor:default;
+  }
+  .tag:hover{ border-color:var(--teal); color:var(--teal); transform:translateY(-2px); box-shadow:0 6px 16px -6px rgba(45,212,191,.4); }
+
+  /* ---- projects ---- */
+  .proj-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:700px){ .proj-grid{grid-template-columns:1fr;} }
+  .proj-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:22px; transition:transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+    position:relative; overflow:hidden;
+  }
+  .proj-card::after{
+    content:''; position:absolute; inset:0; border-radius:var(--radius); padding:1px;
+    background:linear-gradient(135deg, rgba(253,185,19,0), rgba(45,212,191,0));
+    opacity:0; transition:opacity .3s ease; pointer-events:none;
+  }
+  .proj-card:hover{ transform:translateY(-4px); border-color:transparent; box-shadow:0 16px 40px -18px rgba(45,212,191,.35), 0 0 0 1px var(--teal); }
+  .proj-title{ font-family:var(--serif-disp); font-weight:600; font-size:1rem; margin-bottom:8px; }
+  .proj-metric{ display:inline-block; font-family:var(--mono); font-size:11.5px; color:#1a1305; background:var(--gold); padding:3px 9px; border-radius:5px; margin-bottom:10px; font-weight:600;}
+  .proj-desc{ color:var(--muted); font-size:13.5px; margin:0; }
+
+  /* ---- education / certs ---- */
+  .split-two{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:700px){ .split-two{grid-template-columns:1fr;} }
+  .cert-item{ display:flex; align-items:flex-start; gap:10px; margin-bottom:12px; font-size:14px; color:#c3cbdc;}
+  .cert-item:last-child{ margin-bottom:0; }
+  .cert-dot{ color:var(--gold); font-family:var(--mono); }
+
+  /* ---- achievements ---- */
+  .badge-row{ display:flex; gap:16px; flex-wrap:wrap; }
+  .badge{
+    display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:16px 20px; flex:1; min-width:230px; transition:transform .3s ease, border-color .3s;
+  }
+  .badge:hover{ transform:translateY(-3px); border-color:var(--gold-dim); }
+  .badge-icon{ font-size:22px; }
+  .badge-title{ font-weight:600; font-size:14px; }
+  .badge-sub{ font-size:12px; color:var(--muted); font-family:var(--mono); }
+
+  /* ---- footer / contact ---- */
+  footer{ padding:70px 0 30px; text-align:center; }
+  .contact-row{ display:flex; justify-content:center; gap:22px; flex-wrap:wrap; margin-bottom:22px; }
+  .contact-item{
+    display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:13px;
+    color:var(--muted); text-decoration:none; transition:color .25s ease;
+  }
+  .contact-item:hover{ color:var(--teal); }
+  .avail{
+    display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12.5px;
+    color:var(--muted); border:1px solid var(--border); padding:8px 16px; border-radius:20px;
+  }
+  .foot-note{ margin-top:26px; font-size:12px; color:#59617c; font-family:var(--mono); }
+
+  /* ---------- keyframes ---------- */
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes blink{ 50%{opacity:0;} }
+  @keyframes pulseDot{ 0%{box-shadow:0 0 0 0 rgba(253,185,19,.6);} 70%{box-shadow:0 0 0 8px rgba(253,185,19,0);} 100%{box-shadow:0 0 0 0 rgba(253,185,19,0);} }
+  @keyframes travel{ from{left:-40%;} to{left:100%;} }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001s !important; animation-iteration-count:1 !important; transition-duration:.001s !important; }
+    .reveal{ opacity:1; transform:none; }
+  }
+</style>
 </head>
 <body>
 
-<h1>Meseret Melkamu Tinssae</h1>
-<p>Digital Application Management Officer | Backend & Integration Engineer | Fintech Developer</p>
+<div class="grid-bg"></div>
 
-<div class="card">
-  <h2>Contact</h2>
-  <p>📞 +251953241316</p>
-  <p>📧 messi1991mt@gmail.com</p>
-  <p>📍 Ethiopia</p>
-  <p>🔗 LinkedIn: https://www.linkedin.com/in/meseret-melkamu-427b74246</p>
+<nav class="side-nav" aria-hidden="true">
+  <button data-target="hero" class="active" title="Top"></button>
+  <button data-target="summary" title="Summary"></button>
+  <button data-target="experience" title="Experience"></button>
+  <button data-target="skills" title="Skills"></button>
+  <button data-target="projects" title="Projects"></button>
+  <button data-target="education" title="Education"></button>
+  <button data-target="contact" title="Contact"></button>
+</nav>
+
+<div class="wrap">
+
+  <!-- ================= HERO ================= -->
+  <div class="hero" id="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="eyebrow"><span class="status-dot"></span>OPEN TO NEW OPPORTUNITIES · ADDIS ABABA, ET</div>
+        <h1 class="name">Meseret Melkamu<br><span class="accent">Tinssae</span></h1>
+        <div class="role-line"><span class="typed" id="typed"></span><span class="cursor" id="cursor">&nbsp;</span></div>
+        <p class="hero-desc">Computer Science graduate (CGPA 3.90/4.00) with 3+ years building mission-critical financial systems — core banking integrations, ERP customization, and full-stack platforms for Ethiopia's banking sector.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="#contact">Get in touch</a>
+          <a class="btn btn-ghost" href="#experience">View experience</a>
+        </div>
+      </div>
+
+      <div class="console">
+        <div class="console-bar">
+          <span></span><span></span><span></span>
+          <span class="title">integration_flow.log</span>
+        </div>
+        <div class="console-body">
+          <div class="flow" id="flow">
+            <div class="flow-node" data-i="0"><div class="dot"></div><span class="lbl">NibTera<br>App</span></div>
+            <div class="flow-line"></div>
+            <div class="flow-node" data-i="1"><div class="dot"></div><span class="lbl">API<br>Gateway</span></div>
+            <div class="flow-line"></div>
+            <div class="flow-node" data-i="2"><div class="dot"></div><span class="lbl">Temenos<br>T24</span></div>
+            <div class="flow-line"></div>
+            <div class="flow-node" data-i="3"><div class="dot"></div><span class="lbl">Response<br>200 OK</span></div>
+          </div>
+          <div class="code-line" id="cl1"></div>
+          <div class="code-line" id="cl2"></div>
+          <div class="code-line" id="cl3"></div>
+          <div class="code-line" id="cl4"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SUMMARY ================= -->
+  <section id="summary">
+    <div class="section-head reveal">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Summary</h2>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="stat-row reveal">
+      <div class="stat"><div class="num" data-count="3.90">0</div><div class="lbl">CGPA / 4.00</div></div>
+      <div class="stat"><div class="num" data-count="3" data-suffix="+">0</div><div class="lbl">Years Experience</div></div>
+      <div class="stat"><div class="num" data-count="70" data-suffix="%">0</div><div class="lbl">HR Workflow Gain</div></div>
+      <div class="stat"><div class="num" data-count="80" data-suffix="%">0</div><div class="lbl">Engagement Lift</div></div>
+    </div>
+
+    <div class="card reveal">
+      <p>I am a Computer Science graduate (BSc, CGPA 3.90/4.00) with over 3+ years of progressive experience in enterprise (ERP) software development and digital transformation within the banking sector.</p>
+      <p>Currently, I serve as a <b>Digital Application Management Officer</b> at Nib International Bank, working as a backend developer, integration specialist, and contributor to <b>NibTera</b> — an all-in-one super app integrating mobile banking, payments, loans, insurance, and lifestyle services.</p>
+      <p>My experience spans the full software development lifecycle of mission-critical financial systems, including core banking (Temenos T24/TAFJ), ERP systems (Odoo), and modern web/mobile applications.</p>
+      <p>I have worked with technologies such as React, Node.js, Angular, Spring Boot, Django, Laravel, ASP.NET Core, and WordPress, contributing to scalable and secure enterprise solutions.</p>
+      <p>I am passionate about building reliable, secure, and user-centered digital systems, with a strong interest in software engineering, fintech innovation, and system architecture.</p>
+    </div>
+  </section>
+
+  <!-- ================= EXPERIENCE ================= -->
+  <section id="experience">
+    <div class="section-head reveal">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Experience</h2>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="timeline reveal">
+      <div class="tl-item">
+        <div class="tl-role">Junior Software Developer & IT Support</div>
+        <div class="tl-org">Nib International Bank S.C.</div>
+        <ul>
+          <li>Customized and developed Odoo ERP modules, improving HR workflow efficiency by 70%</li>
+          <li>Built scalable web applications using Django, React, Node.js, Angular, and Laravel</li>
+          <li>Developed backend and frontend solutions using Python, C#, JavaScript, and PHP</li>
+          <li>Provided IT support across hardware, software, networking, and user management</li>
+          <li>Maintained IT systems and inventory, ensuring day-to-day system reliability</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SKILLS ================= -->
+  <section id="skills">
+    <div class="section-head reveal">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Technical Skills</h2>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="card reveal">
+      <div class="skill-group">
+        <div class="skill-comment">languages</div>
+        <div class="tag-row">
+          <span class="tag">Python</span><span class="tag">C#</span><span class="tag">JavaScript</span>
+          <span class="tag">PHP</span><span class="tag">Java</span><span class="tag">C++</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-comment">frameworks & platforms</div>
+        <div class="tag-row">
+          <span class="tag">Django</span><span class="tag">React</span><span class="tag">Angular</span>
+          <span class="tag">Node.js</span><span class="tag">Laravel</span><span class="tag">.NET</span><span class="tag">Odoo</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-comment">databases</div>
+        <div class="tag-row">
+          <span class="tag">MySQL</span><span class="tag">PostgreSQL</span><span class="tag">MongoDB</span>
+        </div>
+      </div>
+      <div class="skill-group" style="margin-bottom:0;">
+        <div class="skill-comment">other</div>
+        <div class="tag-row">
+          <span class="tag">API Integration</span><span class="tag">Full Stack Development</span>
+          <span class="tag">IT Support</span><span class="tag">Networking</span><span class="tag">Git</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PROJECTS ================= -->
+  <section id="projects">
+    <div class="section-head reveal">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Projects</h2>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="proj-grid reveal">
+      <div class="proj-card">
+        <div class="proj-metric">+70% efficiency</div>
+        <div class="proj-title">Odoo HR System Customization</div>
+        <p class="proj-desc">Customized ERP modules to streamline HR workflows and reduce processing overhead.</p>
+      </div>
+      <div class="proj-card">
+        <div class="proj-metric">+80% engagement</div>
+        <div class="proj-title">E-commerce Platform</div>
+        <p class="proj-desc">Built with React & Node.js; drove a significant increase in user engagement.</p>
+      </div>
+      <div class="proj-card">
+        <div class="proj-metric">Team Lead</div>
+        <div class="proj-title">Hotel Reservation System</div>
+        <p class="proj-desc">Final year project — led a team through design, build, and delivery.</p>
+      </div>
+      <div class="proj-card">
+        <div class="proj-metric">Coursework</div>
+        <div class="proj-title">Payroll System (C++)</div>
+        <p class="proj-desc">Course project implementing core payroll calculation logic in C++.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EDUCATION / CERTS ================= -->
+  <section id="education">
+    <div class="section-head reveal">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Education & Certifications</h2>
+      <div class="section-rule"></div>
+    </div>
+
+    <div class="split-two reveal">
+      <div class="card">
+        <div class="proj-title" style="margin-bottom:6px;">BSc Computer Science</div>
+        <p style="margin-bottom:4px;">Debre Markos University</p>
+        <p style="color:var(--gold); font-family:var(--mono); font-size:13px;">CGPA 3.90 — Top Graduate</p>
+      </div>
+      <div class="card">
+        <div class="cert-item"><span class="cert-dot">▹</span> COC Level I & II — IT Support</div>
+        <div class="cert-item"><span class="cert-dot">▹</span> COC Level III & IV — Database Administration</div>
+        <div class="cert-item"><span class="cert-dot">▹</span> COC Level V — IT Service Management</div>
+      </div>
+    </div>
+
+    <div class="badge-row reveal" style="margin-top:16px;">
+      <div class="badge"><div class="badge-icon">🏆</div><div><div class="badge-title">1st Graduate</div><div class="badge-sub">2022</div></div></div>
+      <div class="badge"><div class="badge-icon">🎖️</div><div><div class="badge-title">President Ambassador List</div><div class="badge-sub">2020–2022</div></div></div>
+    </div>
+
+    <div class="card reveal" style="margin-top:16px;">
+      <p style="margin:0;">Disciplined, adaptable, patient, strong interpersonal skills, and a problem-solving mindset.</p>
+    </div>
+  </section>
+
+  <!-- ================= CONTACT ================= -->
+  <footer id="contact">
+    <div class="reveal">
+      <div class="avail"><span class="status-dot"></span> Available for new roles</div>
+      <div class="contact-row" style="margin-top:26px;">
+        <a class="contact-item" href="tel:+251953241316">📞 +251 95 324 1316</a>
+        <a class="contact-item" href="mailto:messi1991mt@gmail.com">📧 messi1991mt@gmail.com</a>
+        <a class="contact-item" href="https://www.linkedin.com/in/meseret-melkamu-427b74246" target="_blank" rel="noopener">🔗 LinkedIn</a>
+        <span class="contact-item">📍 Addis Ababa, Ethiopia</span>
+      </div>
+      <div class="foot-note">Meseret Melkamu Tinssae — Digital Application Management Officer</div>
+    </div>
+  </footer>
+
 </div>
 
-<div class="card">
-  <h2>Professional Summary</h2>
-  <p>
-    I am a Computer Science graduate (BSc, CGPA 3.90/4.00) with over 3+ years of progressive experience in enterprise (ERP) software development and digital transformation within the banking sector.
-  </p>
-  <p>
-    Currently, I serve as a <b>Digital Application Management Officer</b> at Nib International Bank, working as a backend developer, integration specialist, and contributor to <b>NibTera</b> — an all-in-one super app integrating mobile banking, payments, loans, insurance, and lifestyle services.
-  </p>
-  <p>
-    My experience spans the full software development lifecycle of mission-critical financial systems, including core banking (Temenos T24/TAFJ), ERP systems (Odoo), and modern web/mobile applications.
-  </p>
-  <p>
-    I have worked with technologies such as React, Node.js, Angular, Spring Boot, Django, Laravel, ASP.NET Core, and WordPress, contributing to scalable and secure enterprise solutions.
-  </p>
-  <p>
-    I am passionate about building reliable, secure, and user-centered digital systems, with a strong interest in software engineering, fintech innovation, and system architecture.
-  </p>
-</div>
+<script>
+  // ---------- typewriter role cycler ----------
+  const roles = ["Digital Application Management Officer", "Backend & Integration Engineer", "Fintech Developer"];
+  const typedEl = document.getElementById('typed');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let ri = 0, ci = 0, deleting = false;
 
-<div class="card">
-  <h2>Experience</h2>
-  <p><b>Nib International Bank – Junior Software Developer & IT Support</b></p>
-  <ul>
-    <li>Customized and developed Odoo ERP modules improving HR workflow efficiency by 70%</li>
-    <li>Built scalable web applications using Django, React, Node.js, Angular, and Laravel</li>
-    <li>Developed backend and frontend solutions using Python, C#, JavaScript, and PHP</li>
-    <li>Provided IT support: hardware, software, networking, and user management</li>
-    <li>Maintained IT systems, inventory, and ensured system reliability</li>
-  </ul>
-</div>
+  function typeLoop(){
+    if(reduceMotion){ typedEl.textContent = roles[0]; return; }
+    const current = roles[ri];
+    if(!deleting){
+      ci++;
+      typedEl.textContent = current.slice(0, ci);
+      if(ci === current.length){ deleting = true; setTimeout(typeLoop, 1400); return; }
+    } else {
+      ci--;
+      typedEl.textContent = current.slice(0, ci);
+      if(ci === 0){ deleting = false; ri = (ri+1) % roles.length; }
+    }
+    setTimeout(typeLoop, deleting ? 35 : 55);
+  }
+  typeLoop();
 
-<div class="card">
-  <h2>Technical Skills</h2>
-  <p><b>Programming:</b> Python, C#, JavaScript, PHP, Java, C++</p>
-  <p><b>Frameworks & Tools:</b> Django, React, Angular, Node.js, Laravel, .NET, Odoo</p>
-  <p><b>Databases:</b> MySQL, PostgreSQL, MongoDB</p>
-  <p><b>Other:</b> API Integration, Full Stack Development, IT Support, Networking, Git</p>
-</div>
+  // ---------- integration flow animation ----------
+  const nodes = document.querySelectorAll('.flow-node');
+  const codeLines = [
+    {el: document.getElementById('cl1'), html: '<span class="k">POST</span> /onboarding/customer'},
+    {el: document.getElementById('cl2'), html: 'validating <span class="s">KYC</span> · <span class="s">AML</span> · <span class="s">facial-match</span> ...'},
+    {el: document.getElementById('cl3'), html: 'routing to core banking <span class="s">T24</span> ...'},
+    {el: document.getElementById('cl4'), html: 'status: <span class="ok">200 OK</span> — account linked'},
+  ];
 
-<div class="card">
-  <h2>Projects</h2>
-  <ul>
-    <li><b>Odoo HR System Customization:</b> Improved workflow efficiency by 70%</li>
-    <li><b>E-commerce Platform:</b> Built with React & Node.js, increased engagement by 80%</li>
-    <li><b>Hotel Reservation System:</b> Final Year Project (Team Leader)</li>
-    <li><b>Payroll System (C++):</b> Course Project</li>
-  </ul>
-</div>
+  function runFlowCycle(){
+    nodes.forEach(n => n.classList.remove('lit'));
+    codeLines.forEach(c => { c.el.style.opacity = 0; c.el.innerHTML = ''; });
 
-<div class="card">
-  <h2>Education</h2>
-  <p>BSc Computer Science – Debre Markos University</p>
-  <p>CGPA: 3.90 (Top Graduate)</p>
-</div>
+    let step = 0;
+    const stepDelay = 650;
+    function nextStep(){
+      if(step < nodes.length){
+        nodes[step].classList.add('lit');
+      }
+      if(step < codeLines.length){
+        codeLines[step].el.innerHTML = codeLines[step].html;
+        codeLines[step].el.style.transition = 'opacity .4s ease';
+        codeLines[step].el.style.opacity = 1;
+      }
+      step++;
+      if(step <= nodes.length){
+        setTimeout(nextStep, stepDelay);
+      } else {
+        setTimeout(runFlowCycle, 2200);
+      }
+    }
+    nextStep();
+  }
+  runFlowCycle();
 
-<div class="card">
-  <h2>Certifications</h2>
-  <ul>
-    <li>COC Level I & II – IT Support</li>
-    <li>COC Level III & IV – Database Administration</li>
-    <li>COC Level V – IT Service Management</li>
-  </ul>
-</div>
+  // ---------- scroll reveal ----------
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => io.observe(el));
 
-<div class="card">
-  <h2>Achievements</h2>
-  <ul>
-    <li>🏆 1st Graduate – 2022</li>
-    <li>🏆 President Ambassador List (2020–2022)</li>
-  </ul>
-</div>
+  // ---------- count-up stats ----------
+  const stats = document.querySelectorAll('.stat .num');
+  const statIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        const el = e.target;
+        const target = parseFloat(el.getAttribute('data-count'));
+        const suffix = el.getAttribute('data-suffix') || '';
+        const isFloat = target % 1 !== 0;
+        const dur = 1200;
+        const start = performance.now();
+        function frame(now){
+          const p = Math.min((now - start) / dur, 1);
+          const val = target * p;
+          el.textContent = (isFloat ? val.toFixed(2) : Math.round(val)) + suffix;
+          if(p < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+        statIO.unobserve(el);
+      }
+    });
+  }, { threshold: 0.4 });
+  stats.forEach(s => statIO.observe(s));
 
-<div class="card">
-  <h2>Strengths</h2>
-  <p>Disciplined, adaptable, patient, strong interpersonal skills, and problem-solving mindset.</p>
-</div>
+  // ---------- side nav active state + scroll-to ----------
+  const sections = ['hero','summary','experience','skills','projects','education','contact'];
+  const navButtons = document.querySelectorAll('.side-nav button');
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.target);
+      if(target) target.scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth'});
+    });
+  });
+  const secObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        const id = entry.target.id;
+        navButtons.forEach(b => b.classList.toggle('active', b.dataset.target === id));
+      }
+    });
+  }, { threshold: 0.5 });
+  sections.forEach(id => { const s = document.getElementById(id); if(s) secObserver.observe(s); });
+</script>
 
 </body>
 </html>
